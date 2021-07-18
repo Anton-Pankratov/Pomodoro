@@ -1,16 +1,14 @@
 package com.rsschool.pomodoro.adapter
 
+import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.rsschool.domain.entity.ShowTimer
 import com.rsschool.pomodoro.databinding.ItemTimerBinding
 
-class TimersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
-
-    private var _binding: ItemTimerBinding? = null
-    private val binding get() = _binding
+class TimersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var showTimers: List<ShowTimer>? = null
 
@@ -28,12 +26,15 @@ class TimersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         if (viewType == TIMER) {
-            ItemTimerBinding.inflate(LayoutInflater.from(parent.context), parent, false).apply {
-                _binding = this
-                return TimerViewHolder(this)
-            }
+            ItemTimerBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent, false
+            )
+                .apply {
+                    return TimerViewHolder(this)
+                }
         } else {
-            return AddTimerViewHolder(View(parent.context))
+            return AddTimerViewHolder(parent.context.createAddTimerView())
         }
     }
 
@@ -43,6 +44,8 @@ class TimersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
             else -> (holder as AddTimerViewHolder).bind()
         }
     }
+
+    private fun Context.createAddTimerView() = ImageView(this)
 
     private companion object {
         const val TIMER = 1

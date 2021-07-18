@@ -1,9 +1,6 @@
 package com.rsschool.pomodoro.presentation
 
-import android.content.Context
 import android.os.Bundle
-import android.util.AttributeSet
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.rsschool.pomodoro.adapter.TimersAdapter
 import com.rsschool.pomodoro.databinding.ActivityPomodoroBinding
