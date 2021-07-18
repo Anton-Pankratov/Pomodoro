@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary -->
+    <color name="carmine_bright">#E87677</color>
+    <color name="flame_magenta">#FF617C</color>
+
+    <!-- Secondary -->
+    <color name="verdepee">#D7D26A</color>
+    <color name="brass">#9F9A38</color>
+
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
