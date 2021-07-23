@@ -5,6 +5,8 @@ import com.rsschool.data.di.DataModule
 import com.rsschool.domain.di.UseCasesModule
 import com.rsschool.pomodoro.di.ViewModelModule
 import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.fragment.koin.fragmentFactory
+import org.koin.core.KoinExperimentalAPI
 import org.koin.core.context.startKoin
 import timber.log.Timber
 

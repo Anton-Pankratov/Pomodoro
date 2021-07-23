@@ -1,4 +1,4 @@
-package com.rsschool.pomodoro.adapter
+package com.rsschool.pomodoro.presentation.adapter
 
 import android.content.Context
 import android.view.LayoutInflater

@@ -14,8 +14,16 @@
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="ToolbarTheme" parent="ThemeOverlay.MaterialComponents.ActionBar">
+    <style name="PomodoroTextStyle" parent="ThemeOverlay.MaterialComponents.Toolbar.Primary">
         <item name="android:fontFamily">@font/machine_gunk</item>
+    </style>
+
+    <style name="PomodoroTextStyle16spWhite" parent="PomodoroTextStyle">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="PomodoroTextStyle26spBlack" parent="PomodoroTextStyle">
         <item name="android:textSize">26sp</item>
     </style>
 

@@ -2,6 +2,7 @@ package com.rsschool.pomodoro
 
 import android.content.Context
 import androidx.annotation.StringRes
+import com.rsschool.pomodoro.entities.SelectTimeEntity
 import timber.log.Timber
 import kotlin.math.roundToInt
 
@@ -12,3 +13,10 @@ fun Context.getStringResource(@StringRes stringRes: Int) =
 
 fun Context.toDp(value: Int) =
     (value * resources.displayMetrics.density + 0.5f).roundToInt()
+
+fun SelectTimeEntity.setFormatTime() =
+    "${hours.format()}:${minutes.format()}:${seconds.format()}"
+
+
+private fun Int.format() =
+    if (this < 10) "0$this" else "$this"

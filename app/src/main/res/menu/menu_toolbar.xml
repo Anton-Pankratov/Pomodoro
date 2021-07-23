@@ -6,7 +6,6 @@
         android:id="@+id/time"
         android:enabled="true"
         app:showAsAction="always"
-        android:icon="@drawable/ic_select_time"
-        android:title="Select" />
+        android:title="" />
 
 </menu>
