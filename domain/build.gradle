@@ -16,6 +16,9 @@ dependencies {
     /** Dependency Injection */
     implementation "io.insert-koin:koin-core-jvm:$koin"
 
+    /** Logcat Logs */
+    api  "com.jakewharton.timber:timber:$timber"
+
     /** Coroutines */
     api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines"

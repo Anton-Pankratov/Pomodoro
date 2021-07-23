@@ -12,12 +12,14 @@
         android:layout_height="?attr/actionBarSize">
 
         <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:title="@string/app_name"
             app:titleCentered="true"
             app:titleTextColor="@color/white"
-            android:theme="@style/ToolbarTheme"/>
+            app:menu="@menu/menu_toolbar"
+            android:theme="@style/ToolbarTheme" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

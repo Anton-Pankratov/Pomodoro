@@ -3,4 +3,7 @@
 
     <string name="button_start">Start</string>
     <string name="button_pause">Pause</string>
+
+    <string name="text_empty_placeholder">You don\'t have a timer</string>
+    <string name="menu_title_select_time">Select time</string>
 </resources>
