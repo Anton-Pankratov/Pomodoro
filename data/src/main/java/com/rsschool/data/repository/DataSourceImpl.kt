@@ -26,6 +26,12 @@ class DataSourceImpl(
         }
     }
 
+    override suspend fun updateTimer(timer: ShowTimer) {
+        withContext(coroutineDispatcher) {
+            dao.updateTimer(mapper.toStoredTimer(timer))
+        }
+    }
+
     override suspend fun deleteTimer(timer: ShowTimer) {
         withContext(coroutineDispatcher) {
             dao.deleteTimer(mapper.toStoredTimer(timer))

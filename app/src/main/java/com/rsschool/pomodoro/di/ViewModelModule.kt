@@ -11,6 +11,6 @@ val ViewModelModule = module {
 
     fragment { TimePickerDialogFragment() }
 
-    viewModel { PomodoroViewModel(get(), get(), get()) }
+    viewModel { PomodoroViewModel(get(), get(), get(), get()) }
     viewModel { TimerPickerDialogViewModel() }
 }

@@ -9,5 +9,7 @@ interface PomodoroRepository {
 
     suspend fun saveTimer(timer: ShowTimer)
 
+    suspend fun updateTimer(timer: ShowTimer)
+
     suspend fun deleteTimer(timer: ShowTimer)
 }

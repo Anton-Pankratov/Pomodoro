@@ -8,5 +8,6 @@ data class StoredTimer(
     @PrimaryKey val id: Int?,
     val hours: Int?,
     val minutes: Int?,
-    val seconds: Int?
+    val seconds: Int?,
+    val state: String?
 )

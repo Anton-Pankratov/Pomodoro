@@ -50,7 +50,9 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$appCompat"
 
     /** LiveData */
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$liveData"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle"
 
     /** Material Design */
     implementation "com.google.android.material:material:$materialDesign"

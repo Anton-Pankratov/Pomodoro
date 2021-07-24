@@ -1,18 +1,14 @@
 package com.rsschool.pomodoro.presentation.timerDialog
 
-import androidx.lifecycle.ViewModel
 import com.rsschool.pomodoro.entities.SelectTimeEntity
+import com.rsschool.pomodoro.presentation.base.BaseViewModel
 
-class TimerPickerDialogViewModel : ViewModel() {
+class TimerPickerDialogViewModel : BaseViewModel() {
 
     val selectTime
-        get() = _selectTime
+        get() = selectedTime
 
     fun keepSelectTime(time: SelectTimeEntity) {
-        _selectTime = time
-    }
-
-    private companion object {
-        var _selectTime: SelectTimeEntity? = null
+        selectedTime = time
     }
 }

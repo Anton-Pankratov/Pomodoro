@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import com.rsschool.pomodoro.databinding.DialogTimePickerBinding
 import com.rsschool.pomodoro.entities.SelectTimeEntity
+import com.rsschool.pomodoro.utils.TimeUnits
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class TimePickerDialogFragment : DialogFragment() {
@@ -64,6 +65,7 @@ class TimePickerDialogFragment : DialogFragment() {
                 units[index].let { unit ->
                     minValue = unit.min
                     maxValue = unit.max
+                    value = unit.default
                 }
             }
         }
@@ -71,7 +73,7 @@ class TimePickerDialogFragment : DialogFragment() {
 
     private fun setStartPickersValues() {
         binding?.apply {
-            viewModel.selectTime?.apply {
+            viewModel.selectTime.apply {
                 hoursPicker.value = hours
                 minutesPicker.value = minutes
                 secondsPicker.value = seconds
@@ -87,9 +89,4 @@ class TimePickerDialogFragment : DialogFragment() {
         onSelectTimeListener?.setTime(this)
     }
 
-    private enum class TimeUnits(val min: Int, val max: Int) {
-        HOUR(0, 24),
-        MINUTE(0, 59),
-        SECOND(0, 59)
-    }
 }

@@ -13,6 +13,9 @@ interface PomodoroDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveTimer(timer: StoredTimer)
 
+    @Update(entity = StoredTimer::class)
+    suspend fun updateTimer(timer: StoredTimer)
+
     @Delete
     suspend fun deleteTimer(timer: StoredTimer)
 }

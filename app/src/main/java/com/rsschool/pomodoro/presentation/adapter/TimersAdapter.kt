@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.rsschool.domain.entity.ShowTimer
@@ -13,11 +14,21 @@ class TimersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var showTimers: List<ShowTimer>? = null
 
-    private var onAddTimerClickListener: OnAddTimerClickListener? = null
+    private var onButtonsClickListener: OnButtonsClickListener? = null
+
+    private var diffUtilCallback: TimersDiffUtilsCallback? = null
+    private var diffResult: DiffUtil.DiffResult? = null
 
     fun setTimers(timers: List<ShowTimer>) {
+        diffUtilCallback = showTimers?.let { TimersDiffUtilsCallback(it, timers) }
+        diffResult = diffUtilCallback?.let { DiffUtil.calculateDiff(it) }
+        diffResult?.dispatchUpdatesTo(this)
         showTimers = timers
         notifyDataSetChanged()
+    }
+
+    fun setOnButtonsClickListener(listener: OnButtonsClickListener) {
+        onButtonsClickListener = listener
     }
 
     override fun getItemCount() = showTimers?.size ?: 0
@@ -37,15 +48,15 @@ class TimersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     TimerViewHolder(
                         ItemTimerBinding.inflate(
                             LayoutInflater.from(context), parent, false
-                        )
+                        ), onButtonsClickListener
                     )
                 }
-                PLACEHOLDER ->
+                PLACEHOLDER -> {
                     EmptyPlaceholderViewHolder(context.createEmptyPlaceholder())
-
+                }
                 else -> AddTimerViewHolder(
                     context.createAddTimerView(),
-                    onAddTimerClickListener
+                    onButtonsClickListener
                 )
             }
         }
@@ -57,10 +68,6 @@ class TimersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             PLACEHOLDER -> (holder as EmptyPlaceholderViewHolder).bind()
             else -> (holder as AddTimerViewHolder).bind()
         }
-    }
-
-    fun setOnAddTimerClickListener(listener: OnAddTimerClickListener) {
-        onAddTimerClickListener = listener
     }
 
     private fun Context.createEmptyPlaceholder() = TextView(this)
