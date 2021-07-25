@@ -48,14 +48,16 @@ class PomodoroActivity : AppCompatActivity() {
         binding?.timers?.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = timersAdapter
-            viewModel.apply {
-                timersFlow.observe(this@PomodoroActivity) { timers ->
-                    if (this@PomodoroActivity.lifecycle.currentState
-                        == Lifecycle.State.RESUMED)
+
+            this@PomodoroActivity.let { context ->
+                viewModel.apply {
+                    timersFlow.observe(context) { timers ->
+                        if (context.lifecycle.currentState == Lifecycle.State.RESUMED)
                             timersAdapter?.apply {
                                 listenOnButtonsClicks()
                                 setTimers(timers)
                             }
+                    }
                 }
             }
         }

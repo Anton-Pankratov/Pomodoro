@@ -16,7 +16,7 @@ fun Context.toDp(value: Int) =
     (value * resources.displayMetrics.density + 0.5f).roundToInt()
 
 fun ShowTimer.setFormatTime() =
-    "${hours?.format()}:${minutes?.format()}:${seconds?.format()}"
+    "${hours?.format()} : ${minutes?.format()} : ${seconds?.format()}"
 
 fun SelectTimeEntity.setFormatTime() =
     "${hours.format()}:${minutes.format()}:${seconds.format()}"

@@ -23,7 +23,7 @@ class TimerViewHolder(
     fun bind(timer: ShowTimer?) {
         binding.apply {
             timeText.setTime(timer)
-            timerOnOffBtn.setOnControlBtnClick(timer)
+            timerControlBtn.setOnControlBtnClick(timer)
             deleteTimerBtn.setOnDeleteBtnClick(timer)
             indicatorIcon
             progressView
@@ -34,7 +34,7 @@ class TimerViewHolder(
         text = timer?.setFormatTime()
     }
 
-    private fun ImageView.setOnControlBtnClick(timer: ShowTimer?) {
+    private fun MaterialButton.setOnControlBtnClick(timer: ShowTimer?) {
         setOnClickListener {
             listener?.onControlClick(timer)
         }

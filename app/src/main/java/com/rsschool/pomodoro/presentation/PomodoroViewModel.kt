@@ -41,26 +41,59 @@ class PomodoroViewModel(
             )
         }
 
-    fun updateTimer(timer: ShowTimer) =
-        viewModelScope.launch {
-            timer.seconds?.downTo(0)?.forEach { second ->
-                updateTimerUseCase.invoke(
-                    ShowTimer(
-                        timer.id,
-                        timer.hours,
-                        timer.minutes,
-                        second,
-                        TimerStates.LAUNCHED.name
-                    )
-                )
-                delay(1000)
-            }
-        }
-
     fun deleteTimer(timer: ShowTimer?) =
         viewModelScope.launch {
             if (timer != null) {
                 deleteTimerUseCase.invoke(timer)
             }
         }
+
+    fun updateTimer(timer: ShowTimer) =
+        viewModelScope.launch {
+            timer.seconds?.downTo(0)?.forEach { second ->
+                timer.formTimerModel(seconds = second).apply {
+                    updateTimerUseCase.invoke(this)
+                    checkEndOfSeconds(second)
+                }
+                delay(1000)
+            }
+        }
+
+    private fun ShowTimer.checkEndOfSeconds(seconds: Int) {
+        viewModelScope.launch {
+            if (seconds == 0) {
+                if (checkEndOfTime()) return@launch
+                if (checkEndOfMinutes()) {
+                    updateNextTimerCycle(formTimerModel(
+                        hours = hours?.minus(1),
+                        minutes = 59,
+                        seconds = 59
+                    ))
+                } else {
+                    updateNextTimerCycle(formTimerModel(
+                        minutes = minutes?.minus(1),
+                        seconds = 59
+                    ))
+                }
+            }
+        }
+    }
+
+    private suspend fun ShowTimer.updateNextTimerCycle(newTimerCycle: ShowTimer) {
+        updateTimerUseCase.invoke(formTimerModel())
+        delay(1000)
+        updateTimerUseCase.invoke(newTimerCycle)
+        updateTimer(newTimerCycle)
+    }
+
+    private fun ShowTimer.checkEndOfMinutes() = minutes == 0
+
+    private fun ShowTimer.checkEndOfTime() =
+        (hours ?: 0) + (minutes ?: 0) + (seconds ?: 0) == 0
+
+    private fun ShowTimer.formTimerModel(
+        hours: Int? = this.hours,
+        minutes: Int? = this.minutes,
+        seconds: Int? = this.seconds,
+    ) = ShowTimer(id, hours, minutes, seconds, state)
 }
