@@ -10,23 +10,36 @@ import com.google.android.material.button.MaterialButton
 import com.rsschool.domain.entity.ShowTimer
 import com.rsschool.pomodoro.R
 import com.rsschool.pomodoro.databinding.ItemTimerBinding
+import com.rsschool.pomodoro.utils.State
 import com.rsschool.pomodoro.utils.getStringResource
 import com.rsschool.pomodoro.utils.setFormatTime
 import com.rsschool.pomodoro.utils.toDp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 class TimerViewHolder(
     private val binding: ItemTimerBinding,
     private val listener: OnButtonsClickListener?
 ) :
-    RecyclerView.ViewHolder(binding.root) {
+    RecyclerView.ViewHolder(binding.root), CoroutineScope {
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Default
 
     fun bind(timer: ShowTimer?) {
         binding.apply {
             timeText.setTime(timer)
-            timerControlBtn.setOnControlBtnClick(timer)
             deleteTimerBtn.setOnDeleteBtnClick(timer)
             indicatorIcon
             progressView
+            timerControlBtn.apply {
+                setOnControlBtnClick(timer)
+                changeButtonTitle(
+                    timer?.state ?: State.CREATED.name
+                )
+            }
         }
     }
 
@@ -36,8 +49,22 @@ class TimerViewHolder(
 
     private fun MaterialButton.setOnControlBtnClick(timer: ShowTimer?) {
         setOnClickListener {
-            listener?.onControlClick(timer)
+            launch(coroutineContext) {
+                listener?.onControlClick(timer)
+            }
         }
+    }
+
+    private fun MaterialButton.changeButtonTitle(state: String) {
+        text = resources.getString(
+            when (state) {
+                State.CREATED.name -> R.string.button_start
+                State.LAUNCHED.name -> R.string.button_pause
+                State.PAUSED.name -> R.string.button_resume
+                State.RESUMED.name -> R.string.button_pause
+                else -> R.string.button_restart
+            }
+        )
     }
 
     private fun ImageView.setOnDeleteBtnClick(timer: ShowTimer?) {

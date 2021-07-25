@@ -1,14 +1,13 @@
 package com.rsschool.pomodoro.presentation
 
 import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
 import com.rsschool.domain.entity.ShowTimer
 import com.rsschool.domain.usecases.DeleteTimerUseCase
 import com.rsschool.domain.usecases.GetTimersUseCase
 import com.rsschool.domain.usecases.SaveTimerUseCase
 import com.rsschool.domain.usecases.UpdateTimerUseCase
 import com.rsschool.pomodoro.presentation.base.BaseViewModel
-import com.rsschool.pomodoro.utils.TimerStates
+import com.rsschool.pomodoro.utils.State
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -30,50 +29,111 @@ class PomodoroViewModel(
         }.asLiveData()
 
     fun saveTimer() =
-        viewModelScope.launch {
+        launch {
             saveTimerUseCase.invoke(
                 ShowTimer(
                     hours = selectedTime.hours,
                     minutes = selectedTime.minutes,
                     seconds = selectedTime.seconds,
-                    state = TimerStates.CREATED.name
+                    state = State.CREATED.name
                 )
             )
         }
 
     fun deleteTimer(timer: ShowTimer?) =
-        viewModelScope.launch {
+        launch {
             if (timer != null) {
                 deleteTimerUseCase.invoke(timer)
             }
         }
 
-    fun updateTimer(timer: ShowTimer) =
-        viewModelScope.launch {
-            timer.seconds?.downTo(0)?.forEach { second ->
-                timer.formTimerModel(seconds = second).apply {
-                    updateTimerUseCase.invoke(this)
-                    checkEndOfSeconds(second)
+    private var countdownIsPaused = false
+
+    fun setControlActionFor(timer: ShowTimer) {
+        launch(coroutineContext) {
+            var controlTimer: ShowTimer
+            timer.apply {
+                when (state) {
+                    State.CREATED.name -> {
+                        countdownIsPaused = false
+                        controlTimer = formTimerModel(state = State.LAUNCHED.name)
+                        launchTimer(controlTimer)
+                    }
+                    State.LAUNCHED.name -> {
+                        countdownIsPaused = true
+                        controlTimer = formTimerModel(state = State.PAUSED.name)
+                        updateTimerUseCase.invoke(controlTimer)
+                    }
+                    State.PAUSED.name -> {
+                        countdownIsPaused = false
+                        controlTimer = formTimerModel(state = State.RESUMED.name)
+                        launchTimer(controlTimer)
+                    }
+                    State.RESUMED.name -> {
+                        countdownIsPaused = true
+                        controlTimer = formTimerModel(state = State.PAUSED.name)
+                        updateTimerUseCase.invoke(controlTimer)
+                    }
+                    State.FINISHED.name -> {
+                        countdownIsPaused = false
+                        launchTimer(formTimerModel(
+                            hours = selectedTime.hours,
+                            minutes = selectedTime.minutes,
+                            seconds = selectedTime.seconds,
+                            state = State.LAUNCHED.name
+                        ))
+                    }
                 }
-                delay(1000)
             }
         }
+    }
+
+    private fun launchTimer(timer: ShowTimer) {
+        timer.apply {
+            launch(coroutineContext) {
+                seconds?.downTo(0)?.forEach { second ->
+                    if (countdownIsPaused) return@launch
+                    formTimerModel(seconds = second).apply {
+                        updateTimerUseCase.invoke(this)
+                        checkEndOfSeconds(second)
+                    }
+                    /**
+                     *  TODO check for responsibility of Start/Stop Button
+                     *  (with Thread button more responsibility, delay - less)
+                     */
+                    Thread.sleep(1000)
+                    // delay(1000)
+                }
+            }
+        }
+    }
 
     private fun ShowTimer.checkEndOfSeconds(seconds: Int) {
-        viewModelScope.launch {
+        launch(coroutineContext) {
             if (seconds == 0) {
-                if (checkEndOfTime()) return@launch
+                if (checkEndOfTime()) {
+                    updateTimerUseCase.invoke(
+                        formTimerModel(
+                            state = State.FINISHED.name
+                        )
+                    )
+                    return@launch
+                }
                 if (checkEndOfMinutes()) {
-                    updateNextTimerCycle(formTimerModel(
-                        hours = hours?.minus(1),
-                        minutes = 59,
-                        seconds = 59
-                    ))
+                    updateNextTimerCycle(
+                        formTimerModel(
+                            hours = hours?.minus(1),
+                            minutes = 59,
+                            seconds = 59
+                        )
+                    )
                 } else {
-                    updateNextTimerCycle(formTimerModel(
-                        minutes = minutes?.minus(1),
-                        seconds = 59
-                    ))
+                    updateNextTimerCycle(
+                        formTimerModel(
+                            minutes = minutes?.minus(1),
+                            seconds = 59
+                        )
+                    )
                 }
             }
         }
@@ -83,7 +143,7 @@ class PomodoroViewModel(
         updateTimerUseCase.invoke(formTimerModel())
         delay(1000)
         updateTimerUseCase.invoke(newTimerCycle)
-        updateTimer(newTimerCycle)
+        launchTimer(newTimerCycle)
     }
 
     private fun ShowTimer.checkEndOfMinutes() = minutes == 0
@@ -95,5 +155,6 @@ class PomodoroViewModel(
         hours: Int? = this.hours,
         minutes: Int? = this.minutes,
         seconds: Int? = this.seconds,
+        state: String? = this.state
     ) = ShowTimer(id, hours, minutes, seconds, state)
 }

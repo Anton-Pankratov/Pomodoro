@@ -95,7 +95,7 @@ class PomodoroActivity : AppCompatActivity() {
         setOnButtonsClickListener(object : OnButtonsClickListener {
             override fun onControlClick(timer: ShowTimer?) {
                 if (timer != null) {
-                    viewModel.updateTimer(timer)
+                    viewModel.setControlActionFor(timer)
                 }
             }
 
