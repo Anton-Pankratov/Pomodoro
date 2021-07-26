@@ -35,6 +35,11 @@ class TimePickerDialogFragment : DialogFragment() {
         setStartPickersValues()
     }
 
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
+    }
+
     override fun onDismiss(dialog: DialogInterface) {
         binding?.apply {
             SelectTimeEntity(

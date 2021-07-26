@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.shapes.Shape
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.AttrRes
@@ -27,6 +29,7 @@ class TimeProgressView @JvmOverloads constructor(
         time?.apply {
             timeLeft = first ?: 0
             timeCommon = second ?: 0
+            invalidate()
         }
     }
 
@@ -36,12 +39,13 @@ class TimeProgressView @JvmOverloads constructor(
             true, formCyclePaint())
 
     private fun calculateCurrentAngle() =
-        ((timeLeft % timeCommon).toFloat() / timeCommon) * 360
+        ((timeCommon - timeLeft).toFloat() / timeCommon.toFloat()) * 360
 
     private fun formCyclePaint(): Paint {
         return Paint().apply {
+            /** flame_magenta -> "#FF617C" */
             color = Color.parseColor("#FF617C")
-            style = Paint.Style.FILL_AND_STROKE
+            style = Paint.Style.FILL
             strokeWidth = 3f
         }
     }

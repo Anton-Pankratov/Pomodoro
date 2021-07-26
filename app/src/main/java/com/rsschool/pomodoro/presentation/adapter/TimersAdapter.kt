@@ -9,32 +9,33 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.rsschool.domain.entity.ShowTimer
 import com.rsschool.pomodoro.databinding.ItemTimerBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
 class TimersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private var showTimers: List<ShowTimer>? = null
+    val scope = CoroutineScope(Dispatchers.Default)
+
+    var showTimers = mutableListOf<ShowTimer>()
 
     private var onButtonsClickListener: OnButtonsClickListener? = null
 
-    private var diffUtilCallback: TimersDiffUtilsCallback? = null
-    private var diffResult: DiffUtil.DiffResult? = null
-
     fun setTimers(timers: List<ShowTimer>) {
-        diffUtilCallback = showTimers?.let { TimersDiffUtilsCallback(it, timers) }
-        diffResult = diffUtilCallback?.let { DiffUtil.calculateDiff(it) }
-        diffResult?.dispatchUpdatesTo(this)
-        showTimers = timers
-        notifyDataSetChanged()
+        showTimers.apply {
+            clear()
+            addAll(timers)
+            notifyDataSetChanged()
+        }
     }
 
     fun setOnButtonsClickListener(listener: OnButtonsClickListener) {
         onButtonsClickListener = listener
     }
 
-    override fun getItemCount() = showTimers?.size ?: 0
+    override fun getItemCount() = showTimers.size
 
     override fun getItemViewType(position: Int): Int {
-        return when (showTimers?.get(position)?.id) {
+        return when (showTimers[position].id) {
             -1 -> PLACEHOLDER
             -2 -> ADD_TIMER
             else -> TIMER
@@ -64,7 +65,7 @@ class TimersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (getItemViewType(position)) {
-            TIMER -> (holder as TimerViewHolder).bind(showTimers?.get(position))
+            TIMER -> (holder as TimerViewHolder).bind(showTimers[position])
             PLACEHOLDER -> (holder as EmptyPlaceholderViewHolder).bind()
             else -> (holder as AddTimerViewHolder).bind()
         }

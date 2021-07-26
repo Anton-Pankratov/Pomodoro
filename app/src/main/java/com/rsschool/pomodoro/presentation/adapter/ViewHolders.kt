@@ -5,16 +5,14 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.rsschool.domain.entity.ShowTimer
 import com.rsschool.pomodoro.R
 import com.rsschool.pomodoro.databinding.ItemTimerBinding
 import com.rsschool.pomodoro.presentation.progress.TimeProgressView
-import com.rsschool.pomodoro.utils.State
-import com.rsschool.pomodoro.utils.getStringResource
-import com.rsschool.pomodoro.utils.setFormatTime
-import com.rsschool.pomodoro.utils.toDp
+import com.rsschool.pomodoro.utils.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,18 +31,18 @@ class TimerViewHolder(
         get() = Dispatchers.Default
 
     fun bind(timer: ShowTimer?) {
-        timer.let {
+        timer?.let {
             binding.apply {
                 timeText.setTime(it)
-                indicatorIcon
+                indicatorIcon.setIndication(it.state)
                 progressView.setActualTime(
-                    it?.calculatedLeftTime to it?.calculatedCommonTime
+                    it.calculatedLeftTime to it.calculatedCommonTime
                 )
                 deleteTimerBtn.setOnDeleteBtnClick(it)
                 timerControlBtn.apply {
                     setOnControlBtnClick(it)
                     changeButtonTitle(
-                        it?.state ?: State.CREATED.name
+                        it.state ?: State.CREATED.name
                     )
                 }
             }
@@ -53,6 +51,14 @@ class TimerViewHolder(
 
     private fun TextView.setTime(timer: ShowTimer?) {
         text = timer?.setFormatTime()
+    }
+
+    private fun ImageView.setIndication(state: String?) {
+        when (state) {
+            State.LAUNCHED.name,
+            State.RESUMED.name -> startBlink()
+            else -> cancelBlink()
+        }
     }
 
     private fun TimeProgressView.setActualTime(time: Pair<Int?, Int?>?) {

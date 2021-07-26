@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rsschool.domain.entity.ShowTimer
 import com.rsschool.pomodoro.R
@@ -12,6 +13,7 @@ import com.rsschool.pomodoro.databinding.ActivityPomodoroBinding
 import com.rsschool.pomodoro.entities.SelectTimeEntity
 import com.rsschool.pomodoro.presentation.adapter.OnButtonsClickListener
 import com.rsschool.pomodoro.presentation.adapter.TimersAdapter
+import com.rsschool.pomodoro.presentation.adapter.TimersDiffUtilsCallback
 import com.rsschool.pomodoro.presentation.timerDialog.OnSelectTimeListener
 import com.rsschool.pomodoro.presentation.timerDialog.TimePickerDialogFragment
 import com.rsschool.pomodoro.utils.setFormatTime
@@ -28,6 +30,9 @@ class PomodoroActivity : AppCompatActivity() {
     private val binding get() = _binding
 
     private var timersAdapter: TimersAdapter? = null
+
+    private var diffUtilCallback: TimersDiffUtilsCallback? = null
+    private var diffResult: DiffUtil.DiffResult? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +60,14 @@ class PomodoroActivity : AppCompatActivity() {
                         if (context.lifecycle.currentState == Lifecycle.State.RESUMED)
                             timersAdapter?.apply {
                                 listenOnButtonsClicks()
+                                diffUtilCallback = TimersDiffUtilsCallback(
+                                    this.showTimers.toList(), timers
+                                )
+                                diffResult = diffUtilCallback?.let {
+                                    DiffUtil.calculateDiff(it)
+                                }
                                 setTimers(timers)
+                                diffResult?.dispatchUpdatesTo(this)
                             }
                     }
                 }

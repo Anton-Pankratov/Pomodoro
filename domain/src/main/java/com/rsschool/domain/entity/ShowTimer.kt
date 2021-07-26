@@ -13,6 +13,10 @@ data class ShowTimer(
     var calculatedCommonTime: Int? = 0
 ) {
 
+    init {
+        calculateTimes()
+    }
+
     fun withStartTime(): ShowTimer {
         startHour = hours
         startMin = minutes
@@ -22,19 +26,30 @@ data class ShowTimer(
         return this
     }
 
+    private fun calculateTimes() {
+        if (startSec != null) {
+            calculateLeftSeconds()
+            calculateCommonSeconds()
+        }
+    }
+
     private fun calculateLeftSeconds() {
-        calculatedLeftTime = calculate(startHour, startMin, startSec)
+        calculatedLeftTime = calculate(
+            hours ?: 0, minutes ?: 0, seconds ?: 0
+        )
     }
 
     private fun calculateCommonSeconds() {
-        calculatedCommonTime =  calculate(startHour, startMin, startSec)
+        calculatedCommonTime = calculate(
+            startHour ?: 0, startMin ?: 0, startSec ?: 0
+        )
     }
 
-    private fun calculate(h: Int?, m: Int?, s: Int?): Int? {
-        return s?.times(
-            if (m != null && m != 0) m else 1
-        )?.times(
-            if (h != null && h != 0) h else 1
-        )
+    private fun calculate(h: Int, m: Int, s: Int): Int {
+        var calculated = 0
+        if (s != 0) calculated += s
+        if (m != 0) calculated += (m * 60)
+        if (h != 0) calculated += (h * 60 * 60)
+        return calculated
     }
 }

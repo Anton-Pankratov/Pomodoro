@@ -8,7 +8,6 @@
     android:layout_marginEnd="16dp"
     android:background="@drawable/bg_item_bottom_edge"
     android:gravity="center_vertical"
-    android:orientation="horizontal"
     android:paddingTop="16dp"
     android:paddingBottom="16dp">
 
@@ -16,32 +15,31 @@
         android:id="@+id/indicator_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:contentDescription="@null"
+        android:src="@drawable/ic_timer_on_indicator"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:src="@drawable/ic_timer_on_indicator" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.1"/>
+        app:layout_constraintGuide_percent="0.1" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/time_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:fontFamily="@font/machine_gunk"
         android:gravity="center_horizontal"
         android:textSize="30sp"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/guideline_left"
         app:layout_constraintEnd_toStartOf="@id/guideline_right"
+        app:layout_constraintStart_toEndOf="@id/guideline_left"
+        app:layout_constraintTop_toTopOf="parent"
         tools:text="00:00:00" />
 
     <androidx.constraintlayout.widget.Guideline
@@ -49,42 +47,39 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.45"/>
+        app:layout_constraintGuide_percent="0.45" />
 
     <com.rsschool.pomodoro.presentation.progress.TimeProgressView
         android:id="@+id/progress_view"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:layout_weight="1"
+        android:background="@drawable/bg_progress_edge"
         android:contentDescription="@null"
-        android:src="@drawable/ic_mock_progress"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/timer_control_btn"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/guideline_right"/>
+        app:layout_constraintEnd_toStartOf="@id/timer_control_btn"
+        app:layout_constraintStart_toEndOf="@id/guideline_right"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/timer_control_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:elevation="6dp"
         android:fontFamily="@font/machine_gunk"
         android:text="@string/button_start"
-        app:layout_constraintTop_toTopOf="parent"
+        android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/delete_timer_btn"
         app:layout_constraintStart_toEndOf="@id/progress_view"
-        android:textSize="20sp" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/delete_timer_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:contentDescription="@null"
-        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/ic_timer_delete"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:src="@drawable/ic_timer_delete" />
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
