@@ -35,8 +35,8 @@ class PomodoroViewModel(
                     hours = selectedTime.hours,
                     minutes = selectedTime.minutes,
                     seconds = selectedTime.seconds,
-                    state = State.CREATED.name
-                )
+                    state = State.CREATED.name,
+                ).withStartTime()
             )
         }
 
@@ -77,9 +77,9 @@ class PomodoroViewModel(
                     State.FINISHED.name -> {
                         countdownIsPaused = false
                         launchTimer(formTimerModel(
-                            hours = selectedTime.hours,
-                            minutes = selectedTime.minutes,
-                            seconds = selectedTime.seconds,
+                            hours = startHour,
+                            minutes = startMin,
+                            seconds = startSec,
                             state = State.LAUNCHED.name
                         ))
                     }
@@ -156,5 +156,8 @@ class PomodoroViewModel(
         minutes: Int? = this.minutes,
         seconds: Int? = this.seconds,
         state: String? = this.state
-    ) = ShowTimer(id, hours, minutes, seconds, state)
+    ) = ShowTimer(
+        id, hours, minutes, seconds,
+        state, startHour, startMin, startSec
+    )
 }

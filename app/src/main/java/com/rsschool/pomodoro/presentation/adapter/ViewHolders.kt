@@ -10,6 +10,7 @@ import com.google.android.material.button.MaterialButton
 import com.rsschool.domain.entity.ShowTimer
 import com.rsschool.pomodoro.R
 import com.rsschool.pomodoro.databinding.ItemTimerBinding
+import com.rsschool.pomodoro.presentation.progress.TimeProgressView
 import com.rsschool.pomodoro.utils.State
 import com.rsschool.pomodoro.utils.getStringResource
 import com.rsschool.pomodoro.utils.setFormatTime
@@ -28,17 +29,24 @@ class TimerViewHolder(
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Default
 
+    private val progressCoroutineContext: CoroutineContext
+        get() = Dispatchers.Default
+
     fun bind(timer: ShowTimer?) {
-        binding.apply {
-            timeText.setTime(timer)
-            deleteTimerBtn.setOnDeleteBtnClick(timer)
-            indicatorIcon
-            progressView
-            timerControlBtn.apply {
-                setOnControlBtnClick(timer)
-                changeButtonTitle(
-                    timer?.state ?: State.CREATED.name
+        timer.let {
+            binding.apply {
+                timeText.setTime(it)
+                indicatorIcon
+                progressView.setActualTime(
+                    it?.calculatedLeftTime to it?.calculatedCommonTime
                 )
+                deleteTimerBtn.setOnDeleteBtnClick(it)
+                timerControlBtn.apply {
+                    setOnControlBtnClick(it)
+                    changeButtonTitle(
+                        it?.state ?: State.CREATED.name
+                    )
+                }
             }
         }
     }
@@ -47,12 +55,8 @@ class TimerViewHolder(
         text = timer?.setFormatTime()
     }
 
-    private fun MaterialButton.setOnControlBtnClick(timer: ShowTimer?) {
-        setOnClickListener {
-            launch(coroutineContext) {
-                listener?.onControlClick(timer)
-            }
-        }
+    private fun TimeProgressView.setActualTime(time: Pair<Int?, Int?>?) {
+        launch(progressCoroutineContext) { withActualTime(time) }
     }
 
     private fun MaterialButton.changeButtonTitle(state: String) {
@@ -70,6 +74,14 @@ class TimerViewHolder(
     private fun ImageView.setOnDeleteBtnClick(timer: ShowTimer?) {
         setOnClickListener {
             listener?.onDeleteClick(timer)
+        }
+    }
+
+    private fun MaterialButton.setOnControlBtnClick(timer: ShowTimer?) {
+        setOnClickListener {
+            launch(coroutineContext) {
+                listener?.onControlClick(timer)
+            }
         }
     }
 }

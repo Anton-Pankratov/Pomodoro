@@ -51,10 +51,10 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.45"/>
 
-    <ImageView
+    <com.rsschool.pomodoro.presentation.progress.TimeProgressView
         android:id="@+id/progress_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_weight="1"
         android:contentDescription="@null"
         android:src="@drawable/ic_mock_progress"

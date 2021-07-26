@@ -7,13 +7,21 @@ class TimerMapper {
 
     fun toShowTimer(stored: StoredTimer): ShowTimer {
         stored.apply {
-            return ShowTimer(id, hours, minutes, seconds, state)
+            return ShowTimer(
+                id, hours, minutes, seconds,
+                state, startHour, startMin, startSec,
+                calculatedLeftTime, calculatedCommonTime
+            )
         }
     }
 
     fun toStoredTimer(show: ShowTimer): StoredTimer {
         show.apply {
-            return StoredTimer(id, hours, minutes, seconds, state)
+            return StoredTimer(
+                id, hours, minutes, seconds,
+                state, startHour, startMin, startSec,
+                calculatedLeftTime, calculatedCommonTime
+            )
         }
     }
 }
