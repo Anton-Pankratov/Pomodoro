@@ -16,6 +16,7 @@ import com.rsschool.pomodoro.presentation.adapter.TimersAdapter
 import com.rsschool.pomodoro.presentation.adapter.TimersDiffUtilsCallback
 import com.rsschool.pomodoro.presentation.timerDialog.OnSelectTimeListener
 import com.rsschool.pomodoro.presentation.timerDialog.TimePickerDialogFragment
+import com.rsschool.pomodoro.utils.Action
 import com.rsschool.pomodoro.utils.setFormatTime
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -107,16 +108,20 @@ class PomodoroActivity : AppCompatActivity() {
         setOnButtonsClickListener(object : OnButtonsClickListener {
             override fun onControlClick(timer: ShowTimer?) {
                 if (timer != null) {
-                    viewModel.setControlActionFor(timer)
+                    viewModel.setButtonAction(
+                        Action.CONTROL.apply { passTimer(timer) }
+                    )
                 }
             }
 
             override fun onDeleteClick(timer: ShowTimer?) {
-                viewModel.deleteTimer(timer)
+                viewModel.setButtonAction(
+                    Action.DELETE.apply { passTimer(timer) }
+                )
             }
 
             override fun onAddListener() {
-                viewModel.saveTimer()
+                viewModel.setButtonAction(Action.ADD)
             }
         })
     }
