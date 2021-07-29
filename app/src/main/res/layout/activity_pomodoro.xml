@@ -26,8 +26,16 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/timers"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:listitem="@layout/item_timer"
+        android:layout_height="wrap_content"
         android:layoutAnimation="@anim/layout_animation"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/select_time_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/menu_title_select_time"
+        android:theme="@style/PomodoroTextStyle16spWhite"/>
 
 </LinearLayout>

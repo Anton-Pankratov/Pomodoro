@@ -4,15 +4,16 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.rsschool.domain.entity.ShowTimer
 import com.rsschool.pomodoro.databinding.ItemTimerBinding
+import com.rsschool.pomodoro.presentation.PomodoroViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
-class TimersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class TimersAdapter(private val viewModel: PomodoroViewModel) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     val scope = CoroutineScope(Dispatchers.Default)
 
@@ -49,14 +50,14 @@ class TimersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     TimerViewHolder(
                         ItemTimerBinding.inflate(
                             LayoutInflater.from(context), parent, false
-                        ), onButtonsClickListener
+                        ), onButtonsClickListener, viewModel
                     )
                 }
                 PLACEHOLDER -> {
                     EmptyPlaceholderViewHolder(context.createEmptyPlaceholder())
                 }
                 else -> AddTimerViewHolder(
-                    context.createAddTimerView(),
+                    context.createButton(),
                     onButtonsClickListener
                 )
             }
@@ -73,7 +74,7 @@ class TimersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private fun Context.createEmptyPlaceholder() = TextView(this)
 
-    private fun Context.createAddTimerView() = MaterialButton(this)
+    private fun Context.createButton() = MaterialButton(this)
 
     private companion object {
         const val TIMER = 1

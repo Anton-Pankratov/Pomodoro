@@ -9,5 +9,4 @@ interface OnButtonsClickListener {
     fun onDeleteClick(timer: ShowTimer?)
 
     fun onAddListener()
-
 }

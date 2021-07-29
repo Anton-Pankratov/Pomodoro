@@ -23,8 +23,8 @@ class PomodoroViewModel(
         get() = getTimersUseCase.invoke().map { list ->
             list.toMutableList().apply {
                 if (list.isNullOrEmpty())
-                    add(ShowTimer(-1, null, null, null, null))
-                add(ShowTimer(-2, null, null, null, null))
+                    addEmptyTimerForView(-1)
+                addEmptyTimerForView(-2)
             }.toList()
         }.asLiveData()
 
@@ -58,6 +58,7 @@ class PomodoroViewModel(
                         countdownIsPaused = false
                         controlTimer = formTimerModel(state = State.LAUNCHED.name)
                         launchTimer(controlTimer)
+                        updateTimerUseCase.invoke(controlTimer)
                     }
                     State.LAUNCHED.name -> {
                         countdownIsPaused = true
@@ -68,6 +69,7 @@ class PomodoroViewModel(
                         countdownIsPaused = false
                         controlTimer = formTimerModel(state = State.RESUMED.name)
                         launchTimer(controlTimer)
+                        updateTimerUseCase.invoke(controlTimer)
                     }
                     State.RESUMED.name -> {
                         countdownIsPaused = true
@@ -76,12 +78,14 @@ class PomodoroViewModel(
                     }
                     State.FINISHED.name -> {
                         countdownIsPaused = false
-                        launchTimer(formTimerModel(
-                            hours = startHour,
-                            minutes = startMin,
-                            seconds = startSec,
-                            state = State.LAUNCHED.name
-                        ))
+                        launchTimer(
+                            formTimerModel(
+                                hours = startHour,
+                                minutes = startMin,
+                                seconds = startSec,
+                                state = State.LAUNCHED.name
+                            )
+                        )
                     }
                 }
             }
@@ -92,7 +96,9 @@ class PomodoroViewModel(
         timer.apply {
             launch(coroutineContext) {
                 seconds?.downTo(0)?.forEach { second ->
-                    if (countdownIsPaused) return@launch
+                    if (countdownIsPaused) {
+                        return@launch
+                    }
                     formTimerModel(seconds = second).apply {
                         updateTimerUseCase.invoke(this)
                         checkEndOfSeconds(second)
@@ -160,4 +166,11 @@ class PomodoroViewModel(
         id, hours, minutes, seconds,
         state, startHour, startMin, startSec
     )
+
+    private fun MutableList<ShowTimer>.addEmptyTimerForView(id: Int) {
+        add(ShowTimer(id, null, null, null,
+            null, null, null, null,
+            null, null)
+        )
+    }
 }

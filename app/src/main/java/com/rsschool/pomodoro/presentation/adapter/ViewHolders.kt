@@ -5,12 +5,13 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.view.isVisible
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.rsschool.domain.entity.ShowTimer
 import com.rsschool.pomodoro.R
 import com.rsschool.pomodoro.databinding.ItemTimerBinding
+import com.rsschool.pomodoro.presentation.PomodoroViewModel
 import com.rsschool.pomodoro.presentation.progress.TimeProgressView
 import com.rsschool.pomodoro.utils.*
 import kotlinx.coroutines.CoroutineScope
@@ -20,7 +21,8 @@ import kotlin.coroutines.CoroutineContext
 
 class TimerViewHolder(
     private val binding: ItemTimerBinding,
-    private val listener: OnButtonsClickListener?
+    private val listener: OnButtonsClickListener?,
+    private val viewModel: PomodoroViewModel
 ) :
     RecyclerView.ViewHolder(binding.root), CoroutineScope {
 
@@ -150,16 +152,15 @@ abstract class BaseTimerItemViewHolder(private val view: View) : RecyclerView.Vi
         )
     }
 
-    fun View.setLayoutParametersWithMargins() {
+    fun View.setLayoutParametersWithMargins(withTop: Boolean = false) {
         layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply {
             context.apply {
                 val padding = toDp(16)
-                setMargins(padding, 0, padding, 0)
+                setMargins(padding, if (withTop) padding else 0, padding, 0)
             }
-
         }
     }
 

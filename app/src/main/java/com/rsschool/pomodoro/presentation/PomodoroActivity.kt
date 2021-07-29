@@ -46,10 +46,11 @@ class PomodoroActivity : AppCompatActivity() {
         setToolbarIcon()
         showTimerPickerByClick()
         listenSelectTimeFromPicker()
+        showTimePickerDialog()
     }
 
     private fun collectTimers() {
-        timersAdapter = TimersAdapter()
+        timersAdapter = TimersAdapter(viewModel)
         binding?.timers?.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = timersAdapter
@@ -84,8 +85,7 @@ class PomodoroActivity : AppCompatActivity() {
 
     private fun showTimerPickerByClick() {
         binding?.toolbar?.setOnMenuItemClickListener(Toolbar.OnMenuItemClickListener {
-            if (!timePickerDialog.isResumed)
-                timePickerDialog.show(supportFragmentManager, "picker")
+            showTimePickerDialog()
             return@OnMenuItemClickListener true
         })
     }
@@ -119,5 +119,12 @@ class PomodoroActivity : AppCompatActivity() {
                 viewModel.saveTimer()
             }
         })
+    }
+
+    private fun showTimePickerDialog() {
+        binding?.selectTimeBtn?.setOnClickListener {
+            if (!timePickerDialog.isResumed)
+                timePickerDialog.show(supportFragmentManager, "picker")
+        }
     }
 }
