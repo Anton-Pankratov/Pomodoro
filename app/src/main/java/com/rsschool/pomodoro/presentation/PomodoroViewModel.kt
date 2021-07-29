@@ -80,8 +80,6 @@ class PomodoroViewModel(
             }
         }
 
-    private var countdownIsPaused = false
-
     private fun setControlActionFor(timer: ShowTimer?) {
         launch(coroutineContext) {
             timer?.apply {
@@ -95,16 +93,18 @@ class PomodoroViewModel(
 
                     State.RESUMED.name -> cancelTimer(State.PAUSED.name)
 
-                    State.FINISHED.name -> {
-                        formTimerModel(
-                            hours = startHour,
-                            minutes = startMin,
-                            seconds = startSec
-                        ).launchTimer(State.LAUNCHED.name)
-                    }
+                    State.FINISHED.name -> launchFinishedTimer(State.LAUNCHED.name)
                 }
             }
         }
+    }
+
+    private suspend fun ShowTimer.launchFinishedTimer(updatedState: String) {
+        formTimerModel(
+            hours = startHour,
+            minutes = startMin,
+            seconds = startSec
+        ).launchTimer(updatedState)
     }
 
     private suspend fun ShowTimer.launchTimer(updatedState: String) {
@@ -119,18 +119,17 @@ class PomodoroViewModel(
         updateTimerUseCase.invoke(formTimerModel(state = updatedState))
     }
 
+    /**
+     *  TODO check for responsibility of Start/Stop Button
+     *  (with Thread button more responsibility, delay - less)
+     */
     private suspend fun startRunningTimer(timer: ShowTimer) {
         timer.apply {
             seconds?.downTo(0)?.forEach { second ->
-                if (countdownIsPaused) return
                 formTimerModel(seconds = second).apply {
                     updateTimerUseCase.invoke(this)
                     checkEndOfSeconds(second)
                 }
-                /**
-                 *  TODO check for responsibility of Start/Stop Button
-                 *  (with Thread button more responsibility, delay - less)
-                 */
                 Thread.sleep(1000)
                 // delay(1000)
             }
