@@ -5,13 +5,11 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.rsschool.domain.entity.ShowTimer
 import com.rsschool.pomodoro.R
 import com.rsschool.pomodoro.databinding.ItemTimerBinding
-import com.rsschool.pomodoro.presentation.PomodoroViewModel
 import com.rsschool.pomodoro.presentation.progress.TimeProgressView
 import com.rsschool.pomodoro.utils.*
 import kotlinx.coroutines.CoroutineScope
@@ -106,7 +104,7 @@ class EmptyPlaceholderViewHolder(private val placeholder: TextView) :
     }
 
     private fun TextView.setText() {
-        text = context.getStringResource(R.string.text_empty_placeholder)
+        text = context.getStringResource(R.string.placeholder_no_timers)
     }
 
     private fun TextView.setCenterGravity() {

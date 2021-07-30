@@ -46,7 +46,7 @@ class PomodoroNotificationUtils(val context: Context) {
         resultIntent.flags =
             Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         return PendingIntent.getActivity(
-            context, 0, resultIntent, PendingIntent.FLAG_ONE_SHOT
+            context, 0, resultIntent, PendingIntent.FLAG_CANCEL_CURRENT
         )
     }
 

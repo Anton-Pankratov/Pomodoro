@@ -12,6 +12,7 @@ import com.rsschool.pomodoro.utils.setFormatTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -42,10 +43,6 @@ class PomodoroService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
-
-    override fun onTaskRemoved(rootIntent: Intent?) {
-        super.onTaskRemoved(rootIntent)
-    }
 
     private fun processCommand(intent: Intent?) {
         (intent?.extras?.getString(COMMAND_ID)
@@ -99,12 +96,14 @@ class PomodoroService : Service() {
 
     private fun launchPomodoroService() {
         notificationUtils.apply {
-            notificationManager?.let { createChannel(it) }
+            notificationManager?.let {
+                createChannel(it)
+            }
             startForeground(
                 NOTIFICATION_ID,
                 getNotification(
                     resources.getString(
-                        R.string.start_notification_content
+                        R.string.notification_timer_not_exist
                     )
                 )
             )
@@ -114,26 +113,25 @@ class PomodoroService : Service() {
     private fun continueTimer(timerId: Int) {
         serviceJob = serviceScope.launch {
             if (timerId != 0) {
-                getLaunchedTimerUseCase.invoke(timerId).collect { timer ->
-                    timer.setNotificationTimerContent(timerId)
-                }
+                getLaunchedTimerUseCase.invoke(timerId).cancellable()
+                    .collect { timer ->
+                        timer.setNotificationTimerContent(timerId)
+                    }
             }
         }
     }
 
-    private fun ShowTimer.setNotificationTimerContent(launchedTimerId: Int) {
-        notificationManager?.notify(
-            NOTIFICATION_ID,
-            notificationUtils
-                .getNotification(
-                    if (launchedTimerId != 0) {
-                        setFormatTime()
-                    } else {
-                        resources.getString(
-                            R.string.text_no_active_timer
-                        )
-                    }
+    private fun ShowTimer.setNotificationTimerContent(timerId: Int) =
+        notificationManager?.notify(NOTIFICATION_ID, Notification(timerId))
+
+    private fun ShowTimer.Notification(timerId: Int) =
+        notificationUtils.getNotification(
+            if (timerId != 0) {
+                setFormatTime()
+            } else {
+                resources.getString(
+                    R.string.notification_timer_not_exist
                 )
+            }
         )
-    }
 }

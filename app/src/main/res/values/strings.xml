@@ -7,8 +7,8 @@
     <string name="button_done">Done</string>
     <string name="button_restart">Restart</string>
 
-    <string name="text_empty_placeholder">You don\'t have a timer</string>
     <string name="menu_title_select_time">Select your time</string>
-    <string name="start_notification_content">Your timer</string>
-    <string name="text_no_active_timer">You have no active timer</string>
+    <string name="placeholder_no_timers">You don\'t have a timer</string>
+    <string name="notification_timer_not_exist">You have no active timer</string>
+    <string name="notification_time_is_over">Time is over</string>
 </resources>

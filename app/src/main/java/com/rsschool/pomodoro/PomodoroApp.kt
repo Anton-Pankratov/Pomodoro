@@ -47,12 +47,4 @@ class PomodoroApp : Application(), LifecycleObserver {
         stopIntent.putExtra(COMMAND_ID, Command.STOP.value)
         startService(stopIntent)
     }
-
-    private fun startPomodoroService(intent: Intent) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
-        }
-    }
 }

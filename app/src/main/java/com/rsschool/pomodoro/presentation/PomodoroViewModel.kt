@@ -41,16 +41,17 @@ class PomodoroViewModel(
     private var launchedTimer: ShowTimer? = null
 
     init {
+        setOnPauseLaunchedTimers()
         collectTimerButtonsEvents()
-    }
-
-    suspend fun setOnPauseAllTimersBeforeCloseApp() {
-        if (timerLauncherJob?.isActive == true) timerLauncherJob?.cancelAndJoin()
-        launch { updateBeforeCloseAppUseCase.invoke() }.start()
     }
 
     fun setButtonAction(action: Action) =
         launch { _timerControlFlow.emit(action) }
+
+    private fun setOnPauseLaunchedTimers() {
+        if (timerLauncherJob?.isActive == true) timerLauncherJob?.cancel()
+        launch { updateBeforeCloseAppUseCase.invoke() }.start()
+    }
 
     private fun collectTimerButtonsEvents() {
         launch {
@@ -132,17 +133,15 @@ class PomodoroViewModel(
     }
 
     private suspend fun ShowTimer.cancelTimer(newState: String) {
-        timerLauncherJob?.cancelAndJoin()
-        if (timerLauncherJob?.isActive == false)
-            updateTimerUseCase.invoke(updateTimerState(newState))
+        timerLauncherJob?.apply {
+            cancelAndJoin()
+            if (!isActive || isCancelled || isCompleted)
+                updateTimerUseCase.invoke(updateTimerState(newState))
+        }
     }
 
-    /**
-     *  TODO check for responsibility of Start/Stop Button
-     *  (with Thread button more responsibility, delay - less)
-     */
     private fun startRunningTimer(timer: ShowTimer) {
-        timerLauncherJob = launch {
+        timerLauncherJob = launch(coroutineContext) {
             timer.apply {
                 pauseOtherLaunchedOrResumedTimer()
                 seconds?.downTo(0)?.forEach { second ->
@@ -150,8 +149,7 @@ class PomodoroViewModel(
                         updateTimerUseCase.invoke(this)
                         checkEndOfSeconds(second)
                     }
-                    Thread.sleep(1000)
-                    // delay(1000)
+                    delay(1000)
                 }
             }
         }
