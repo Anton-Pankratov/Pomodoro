@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.*
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.rsschool.domain.entity.ShowTimer
@@ -18,6 +18,7 @@ import com.rsschool.pomodoro.presentation.timerDialog.OnSelectTimeListener
 import com.rsschool.pomodoro.presentation.timerDialog.TimePickerDialogFragment
 import com.rsschool.pomodoro.utils.Action
 import com.rsschool.pomodoro.utils.setFormatTime
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -51,7 +52,7 @@ class PomodoroActivity : AppCompatActivity() {
     }
 
     private fun collectTimers() {
-        timersAdapter = TimersAdapter(viewModel)
+        timersAdapter = TimersAdapter()
         binding?.timers?.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = timersAdapter
@@ -106,10 +107,10 @@ class PomodoroActivity : AppCompatActivity() {
 
     private fun TimersAdapter.listenOnButtonsClicks() {
         setOnButtonsClickListener(object : OnButtonsClickListener {
-            override fun onControlClick(timer: ShowTimer?) {
-                if (timer != null) {
+            override fun onControlClick(clickedTimer: ShowTimer?) {
+                if (clickedTimer != null) {
                     viewModel.setButtonAction(
-                        Action.CONTROL.apply { passTimer(timer) }
+                        Action.CONTROL.apply { passTimer(clickedTimer) }
                     )
                 }
             }

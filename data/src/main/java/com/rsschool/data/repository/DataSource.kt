@@ -12,4 +12,6 @@ interface DataSource {
     suspend fun updateTimer(timer: ShowTimer)
 
     suspend fun deleteTimer(timer: ShowTimer)
+
+    suspend fun updateAllTimers()
 }

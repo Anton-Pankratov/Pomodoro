@@ -13,9 +13,12 @@ interface PomodoroDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveTimer(timer: StoredTimer)
 
+    @Delete
+    suspend fun deleteTimer(timer: StoredTimer)
+
     @Update(entity = StoredTimer::class)
     suspend fun updateTimer(timer: StoredTimer)
 
-    @Delete
-    suspend fun deleteTimer(timer: StoredTimer)
+    @Query("UPDATE timer SET state = 'PAUSED' WHERE state LIKE 'RESUMED' OR state LIKE 'LAUNCHED'")
+    suspend fun updateAllTimers()
 }

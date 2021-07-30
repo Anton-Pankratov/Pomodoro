@@ -8,12 +8,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.rsschool.domain.entity.ShowTimer
 import com.rsschool.pomodoro.databinding.ItemTimerBinding
-import com.rsschool.pomodoro.presentation.PomodoroViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
-class TimersAdapter(private val viewModel: PomodoroViewModel) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class TimersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     val scope = CoroutineScope(Dispatchers.Default)
 
@@ -50,7 +48,7 @@ class TimersAdapter(private val viewModel: PomodoroViewModel) :
                     TimerViewHolder(
                         ItemTimerBinding.inflate(
                             LayoutInflater.from(context), parent, false
-                        ), onButtonsClickListener, viewModel
+                        ), onButtonsClickListener,
                     )
                 }
                 PLACEHOLDER -> {

@@ -19,6 +19,7 @@ buildscript {
 
         /** Lifecycle */
         lifecycle = '2.3.1'
+        lifecycleExt = '2.2.0'
 
         /** Database */
         room = '2.3.0'

@@ -52,7 +52,9 @@ dependencies {
     /** LiveData */
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle"
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleExt"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle"
+    annotationProcessor "androidx.lifecycle:lifecycle-compiler:$lifecycle"
 
     /** Material Design */
     implementation "com.google.android.material:material:$materialDesign"

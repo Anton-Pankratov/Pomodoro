@@ -1,5 +1,5 @@
 package com.rsschool.domain.usecases
 
-class GetTimersUseCase : BaseUseCase() {
+class GetTimersFlowUseCase : BaseUseCase() {
     operator fun invoke() = repository.timers
 }

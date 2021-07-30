@@ -38,4 +38,9 @@ class DataSourceImpl(
         }
     }
 
+    override suspend fun updateAllTimers() {
+        withContext(coroutineDispatcher) {
+            dao.updateAllTimers()
+        }
+    }
 }

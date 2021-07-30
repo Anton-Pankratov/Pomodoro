@@ -21,8 +21,7 @@ import kotlin.coroutines.CoroutineContext
 
 class TimerViewHolder(
     private val binding: ItemTimerBinding,
-    private val listener: OnButtonsClickListener?,
-    private val viewModel: PomodoroViewModel
+    private val listener: OnButtonsClickListener?
 ) :
     RecyclerView.ViewHolder(binding.root), CoroutineScope {
 

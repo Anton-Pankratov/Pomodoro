@@ -29,4 +29,6 @@ class PomodoroRepositoryImpl : PomodoroRepository, KoinComponent {
     override suspend fun deleteTimer(timer: ShowTimer) =
         dataSource.deleteTimer(timer)
 
+    override suspend fun updateAllTimers() =
+        dataSource.updateAllTimers()
 }

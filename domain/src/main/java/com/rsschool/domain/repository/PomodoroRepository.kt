@@ -12,4 +12,6 @@ interface PomodoroRepository {
     suspend fun updateTimer(timer: ShowTimer)
 
     suspend fun deleteTimer(timer: ShowTimer)
+
+    suspend fun updateAllTimers()
 }

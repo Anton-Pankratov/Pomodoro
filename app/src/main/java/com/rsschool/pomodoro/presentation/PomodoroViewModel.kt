@@ -2,36 +2,34 @@ package com.rsschool.pomodoro.presentation
 
 import androidx.lifecycle.asLiveData
 import com.rsschool.domain.entity.ShowTimer
-import com.rsschool.domain.usecases.DeleteTimerUseCase
-import com.rsschool.domain.usecases.GetTimersUseCase
-import com.rsschool.domain.usecases.SaveTimerUseCase
-import com.rsschool.domain.usecases.UpdateTimerUseCase
+import com.rsschool.domain.usecases.*
 import com.rsschool.pomodoro.presentation.base.BaseViewModel
 import com.rsschool.pomodoro.utils.Action
 import com.rsschool.pomodoro.utils.State
 import com.rsschool.pomodoro.utils.TimerButtonsActions
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 class PomodoroViewModel(
-    private val getTimersUseCase: GetTimersUseCase,
+    private val getTimersFlowUseCase: GetTimersFlowUseCase,
     private val saveTimerUseCase: SaveTimerUseCase,
     private val updateTimerUseCase: UpdateTimerUseCase,
-    private val deleteTimerUseCase: DeleteTimerUseCase
+    private val deleteTimerUseCase: DeleteTimerUseCase,
+    private val updateBeforeCloseAppUseCase: UpdateBeforeCloseAppUseCase
 ) : BaseViewModel() {
 
     val timersFlow
-        get() = getTimersUseCase.invoke().map { list ->
+        get() = getTimersFlowUseCase.invoke().map { list ->
             list.toMutableList().apply {
-                if (list.isNullOrEmpty())
+                if (isNullOrEmpty())
                     addEmptyTimerForView(-1)
                 addEmptyTimerForView(-2)
-            }.toList()
+            }.toList().also {
+                it.findLaunchedTimer()
+            }
         }.asLiveData()
 
     private val _timerControlFlow = MutableStateFlow(Action.NONE)
@@ -39,8 +37,15 @@ class PomodoroViewModel(
 
     private var timerLauncherJob: Job? = null
 
+    private var launchedTimer: ShowTimer? = null
+
     init {
         collectTimerButtonsEvents()
+    }
+
+    suspend fun setOnPauseAllTimersBeforeCloseApp() {
+        if (timerLauncherJob?.isActive == true) timerLauncherJob?.cancelAndJoin()
+        launch { updateBeforeCloseAppUseCase.invoke() }.start()
     }
 
     fun setButtonAction(action: Action) =
@@ -54,9 +59,18 @@ class PomodoroViewModel(
                         Action.ADD -> saveTimer()
                         Action.DELETE -> deleteTimer(selectedTimer)
                         Action.CONTROL -> setControlActionFor(selectedTimer)
+                        Action.NONE -> { }
                     }
                 }
                 _timerControlFlow.emit(Action.NONE)
+            }
+        }
+    }
+
+    private fun List<ShowTimer>.findLaunchedTimer() {
+        launch {
+            launchedTimer = this@findLaunchedTimer.find {
+                it.state == State.LAUNCHED.name || it.state == State.RESUMED.name
             }
         }
     }
@@ -99,7 +113,7 @@ class PomodoroViewModel(
         }
     }
 
-    private suspend fun ShowTimer.launchFinishedTimer(updatedState: String) {
+    private fun ShowTimer.launchFinishedTimer(updatedState: String) {
         formTimerModel(
             hours = startHour,
             minutes = startMin,
@@ -107,31 +121,44 @@ class PomodoroViewModel(
         ).launchTimer(updatedState)
     }
 
-    private suspend fun ShowTimer.launchTimer(updatedState: String) {
-        timerLauncherJob?.cancel()
-        formTimerModel(state = updatedState).apply {
-            timerLauncherJob = launch { startRunningTimer(this@apply) }
-        }
+    private fun ShowTimer.launchTimer(newState: String) {
+        if (timerLauncherJob?.isActive == true)
+            timerLauncherJob?.cancel()
+        startRunningTimer(updateTimerState(newState))
     }
 
-    private suspend fun ShowTimer.cancelTimer(updatedState: String) {
-        timerLauncherJob?.cancel()
-        updateTimerUseCase.invoke(formTimerModel(state = updatedState))
+    private suspend fun ShowTimer.cancelTimer(newState: String) {
+        timerLauncherJob?.cancelAndJoin()
+        if (timerLauncherJob?.isActive == false)
+            updateTimerUseCase.invoke(updateTimerState(newState))
     }
 
     /**
      *  TODO check for responsibility of Start/Stop Button
      *  (with Thread button more responsibility, delay - less)
      */
-    private suspend fun startRunningTimer(timer: ShowTimer) {
-        timer.apply {
-            seconds?.downTo(0)?.forEach { second ->
-                formTimerModel(seconds = second).apply {
-                    updateTimerUseCase.invoke(this)
-                    checkEndOfSeconds(second)
+    private fun startRunningTimer(timer: ShowTimer) {
+        timerLauncherJob = launch {
+            timer.apply {
+                pauseOtherLaunchedOrResumedTimer()
+                seconds?.downTo(0)?.forEach { second ->
+                    formTimerModel(seconds = second).apply {
+                        updateTimerUseCase.invoke(this)
+                        checkEndOfSeconds(second)
+                    }
+                    Thread.sleep(1000)
+                    // delay(1000)
                 }
-                Thread.sleep(1000)
-                // delay(1000)
+            }
+        }
+    }
+
+    private suspend fun ShowTimer.pauseOtherLaunchedOrResumedTimer() {
+        if (id != launchedTimer?.id) {
+            launchedTimer?.let {
+                updateTimerUseCase.invoke(
+                    it.updateTimerState(State.PAUSED.name)
+                )
             }
         }
     }
@@ -141,7 +168,7 @@ class PomodoroViewModel(
             if (seconds == 0) {
                 if (checkEndOfTime()) {
                     updateTimerUseCase.invoke(
-                        formTimerModel(state = State.FINISHED.name)
+                        updateTimerState(State.FINISHED.name)
                     )
                     return@launch
                 }
@@ -176,6 +203,9 @@ class PomodoroViewModel(
 
     private fun ShowTimer.checkEndOfTime() =
         (hours ?: 0) + (minutes ?: 0) + (seconds ?: 0) == 0
+
+    private fun ShowTimer.updateTimerState(state: String) =
+        formTimerModel(state = state)
 
     private fun ShowTimer.formTimerModel(
         hours: Int? = this.hours,
