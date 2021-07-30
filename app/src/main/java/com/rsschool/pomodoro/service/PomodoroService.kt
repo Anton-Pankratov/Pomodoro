@@ -2,19 +2,23 @@ package com.rsschool.pomodoro.service
 
 import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
-import com.rsschool.domain.usecases.GetTimersFlowUseCase
-import com.rsschool.pomodoro.utils.debug
-import kotlinx.coroutines.*
+import com.rsschool.domain.entity.ShowTimer
+import com.rsschool.domain.usecases.GetLaunchedTimerUseCase
+import com.rsschool.pomodoro.R
+import com.rsschool.pomodoro.utils.setFormatTime
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
 class PomodoroService : Service() {
 
-    private val getTimersFlowUseCase: GetTimersFlowUseCase by inject()
+    private val getLaunchedTimerUseCase: GetLaunchedTimerUseCase by inject()
 
     private var isServiceStarted = false
 
@@ -27,7 +31,9 @@ class PomodoroService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        setNotificationManager()
+        notificationManager =
+            notificationUtils
+                .provide(applicationContext)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -41,33 +47,28 @@ class PomodoroService : Service() {
         super.onTaskRemoved(rootIntent)
     }
 
-    private fun setNotificationManager() {
-        notificationManager =
-            applicationContext
-                .getSystemService(Context.NOTIFICATION_SERVICE)
-                    as? NotificationManager
-    }
-
     private fun processCommand(intent: Intent?) {
-        when (intent?.extras?.getString(COMMAND_ID) ?: INVALID) {
-            COMMAND_START -> {
-                commandStart(
-                    intent?.extras?.getLong(STARTED_TIMER_TIME_MS)
-                        ?: return
-                )
+        (intent?.extras?.getString(COMMAND_ID)
+            ?: Command.INVALID.value).let { command ->
+            when (command) {
+                Command.START.value ->
+                    commandStart(
+                        intent?.extras
+                            ?.getInt(TIMER_ID) ?: 0
+                    )
+                Command.STOP.value -> commandStop()
+                Command.INVALID.value -> return
             }
-            COMMAND_STOP -> commandStop()
-            INVALID -> return
         }
     }
 
-    private fun commandStart(startTime: Long) {
+    private fun commandStart(timerId: Int) {
         if (isServiceStarted) return
 
         try {
             moveToStartedState()
             launchPomodoroService()
-            continueTimer(startTime)
+            continueTimer(timerId)
         } finally {
             isServiceStarted = true
         }
@@ -75,17 +76,20 @@ class PomodoroService : Service() {
 
     private fun commandStop() {
         if (!isServiceStarted) return
-         try {
-             serviceJob?.cancel()
-             stopForeground(true)
-             stopSelf()
-         } finally {
-             isServiceStarted = false
-         }
+        try {
+            serviceJob?.cancel()
+            stopForeground(true)
+            stopSelf()
+        } finally {
+            isServiceStarted = false
+        }
     }
 
     private fun moveToStartedState() {
-        val startIntent = Intent(this, PomodoroService::class.java)
+        val startIntent = Intent(
+            this,
+            PomodoroService::class.java
+        )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(startIntent)
         } else {
@@ -96,38 +100,40 @@ class PomodoroService : Service() {
     private fun launchPomodoroService() {
         notificationUtils.apply {
             notificationManager?.let { createChannel(it) }
-            startForeground(NOTIFICATION_ID, getNotification("content"))
+            startForeground(
+                NOTIFICATION_ID,
+                getNotification(
+                    resources.getString(
+                        R.string.start_notification_content
+                    )
+                )
+            )
         }
     }
 
-    private fun continueTimer(startTime: Long) {
+    private fun continueTimer(timerId: Int) {
         serviceJob = serviceScope.launch {
-            getTimersFlowUseCase.invoke().collect {
-                debug(it.toString())
-            }
-
-            while (true) {
-               /* notificationManager?.notify(
-                    NOTIFICATION_ID,
-                    *//*notificationUtils.getNotification(
-                        System.currentTimeMillis() - startTime
-                    )*//*
-                )*/
+            if (timerId != 0) {
+                getLaunchedTimerUseCase.invoke(timerId).collect { timer ->
+                    timer.setNotificationTimerContent(timerId)
+                }
             }
         }
     }
 
-    private companion object {
-        const val START_TIME = "00:00:00:00"
-        const val INVALID = "INVALID"
-        const val COMMAND_START = "COMMAND_START"
-        const val COMMAND_STOP = "COMMAND_STOP"
-        const val COMMAND_ID = "COMMAND_ID"
-        const val STARTED_TIMER_TIME_MS = "STARTED_TIMER_TIME"
-
-
-        private const val CHANNEL_ID = "Channel_ID"
-        private const val NOTIFICATION_ID = 777
-        private const val INTERVAL = 1000L
+    private fun ShowTimer.setNotificationTimerContent(launchedTimerId: Int) {
+        notificationManager?.notify(
+            NOTIFICATION_ID,
+            notificationUtils
+                .getNotification(
+                    if (launchedTimerId != 0) {
+                        setFormatTime()
+                    } else {
+                        resources.getString(
+                            R.string.text_no_active_timer
+                        )
+                    }
+                )
+        )
     }
 }

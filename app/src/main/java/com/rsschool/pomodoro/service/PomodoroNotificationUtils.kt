@@ -17,6 +17,9 @@ class PomodoroNotificationUtils(val context: Context) {
     fun getNotification(content: String) =
         notificationBuilder.setContentText(content).build()
 
+    fun provide(context: Context) =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+
     private fun build() = NotificationCompat.Builder(context, CHANNEL_ID)
         .setContentTitle(TITLE)
         .setGroup(TIMERS_GROUP)

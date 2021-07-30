@@ -7,6 +7,8 @@ interface DataSource {
 
     val timersFlow: Flow<List<ShowTimer>>
 
+    fun timerFlow(id: Int?): Flow<ShowTimer>
+
     suspend fun saveTimer(timer: ShowTimer)
 
     suspend fun updateTimer(timer: ShowTimer)

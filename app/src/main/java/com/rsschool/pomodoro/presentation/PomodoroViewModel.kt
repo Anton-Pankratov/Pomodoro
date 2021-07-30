@@ -4,6 +4,7 @@ import androidx.lifecycle.asLiveData
 import com.rsschool.domain.entity.ShowTimer
 import com.rsschool.domain.usecases.*
 import com.rsschool.pomodoro.presentation.base.BaseViewModel
+import com.rsschool.pomodoro.service.launchedTimerId
 import com.rsschool.pomodoro.utils.Action
 import com.rsschool.pomodoro.utils.State
 import com.rsschool.pomodoro.utils.TimerButtonsActions
@@ -69,8 +70,11 @@ class PomodoroViewModel(
 
     private fun List<ShowTimer>.findLaunchedTimer() {
         launch {
-            launchedTimer = this@findLaunchedTimer.find {
+            this@findLaunchedTimer.find {
                 it.state == State.LAUNCHED.name || it.state == State.RESUMED.name
+            }.apply {
+                launchedTimerId = this?.id ?: 0
+                launchedTimer = this
             }
         }
     }

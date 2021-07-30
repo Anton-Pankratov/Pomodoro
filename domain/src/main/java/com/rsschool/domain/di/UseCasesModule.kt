@@ -7,6 +7,8 @@ val UseCasesModule = module {
 
     single { GetTimersFlowUseCase() }
 
+    single { GetLaunchedTimerUseCase() }
+
     single { SaveTimerUseCase() }
 
     single { UpdateTimerUseCase() }
@@ -14,5 +16,4 @@ val UseCasesModule = module {
     single { DeleteTimerUseCase() }
 
     single { UpdateBeforeCloseAppUseCase() }
-
 }

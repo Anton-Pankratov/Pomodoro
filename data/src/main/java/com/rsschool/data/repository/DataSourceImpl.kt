@@ -20,6 +20,9 @@ class DataSourceImpl(
                 mapper.toShowTimer(it) }
         }
 
+    override fun timerFlow(id: Int?) =
+        dao.timerFlow(id).map { mapper.toShowTimer(it) }
+
     override suspend fun saveTimer(timer: ShowTimer) {
         withContext(coroutineDispatcher) {
             dao.saveTimer(mapper.toStoredTimer(timer))

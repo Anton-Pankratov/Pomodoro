@@ -19,9 +19,11 @@ class PomodoroRepositoryImpl : PomodoroRepository, KoinComponent {
     override val timers: Flow<List<ShowTimer>>
         get() = dataSource.timersFlow
 
+    override fun timer(id: Int?) = dataSource.timerFlow(id)
+
+
     override suspend fun saveTimer(timer: ShowTimer) =
         dataSource.saveTimer(timer)
-
 
     override suspend fun updateTimer(timer: ShowTimer) =
         dataSource.updateTimer(timer)

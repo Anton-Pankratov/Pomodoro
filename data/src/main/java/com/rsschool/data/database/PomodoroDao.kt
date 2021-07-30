@@ -10,6 +10,9 @@ interface PomodoroDao {
     @Query("SELECT * FROM timer")
     fun timersFlow(): Flow<List<StoredTimer>>
 
+    @Query("SELECT * FROM timer WHERE id = :timerId")
+    fun timerFlow(timerId: Int?): Flow<StoredTimer>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveTimer(timer: StoredTimer)
 
