@@ -5,7 +5,7 @@ typealias State = TimerStates
 enum class TimerStates {
     CREATED,
     LAUNCHED,
-    PAUSED,
+    STOPED,
     RESUMED,
     FINISHED
 }

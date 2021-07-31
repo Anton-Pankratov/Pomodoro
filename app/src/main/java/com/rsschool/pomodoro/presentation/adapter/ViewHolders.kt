@@ -2,15 +2,14 @@ package com.rsschool.pomodoro.presentation.adapter
 
 import android.view.Gravity
 import android.view.View
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.rsschool.domain.entity.ShowTimer
 import com.rsschool.pomodoro.R
 import com.rsschool.pomodoro.databinding.ItemTimerBinding
-import com.rsschool.pomodoro.presentation.progress.TimeProgressView
 import com.rsschool.pomodoro.utils.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,63 +29,76 @@ class TimerViewHolder(
         get() = Dispatchers.Default
 
     fun bind(timer: ShowTimer?) {
-        timer?.let {
-            binding.apply {
-                timeText.setTime(it)
-                indicatorIcon.setIndication(it.state)
-                progressView.setActualTime(
-                    it.calculatedLeftTime to it.calculatedCommonTime
-                )
-                deleteTimerBtn.setOnDeleteBtnClick(it)
-                timerControlBtn.apply {
-                    setOnControlBtnClick(it)
-                    changeButtonTitle(
-                        it.state ?: State.CREATED.name
-                    )
-                }
-            }
+        timer?.apply {
+            setTimeText()
+            setTimeIndication()
+            setTimeProgress()
+            setOnControlButtonTitle()
+            setOnControlBtnClick()
+            setOnDeleteBtnClick()
+            setTimerItemBackground()
         }
     }
 
-    private fun TextView.setTime(timer: ShowTimer?) {
-        text = timer?.setFormatTime()
+    private fun ShowTimer.setTimeText() {
+        binding.timeText.text = setFormatTime()
     }
 
-    private fun ImageView.setIndication(state: String?) {
-        when (state) {
-            State.LAUNCHED.name,
-            State.RESUMED.name -> startBlink()
-            else -> cancelBlink()
-        }
-    }
-
-    private fun TimeProgressView.setActualTime(time: Pair<Int?, Int?>?) {
-        launch(progressCoroutineContext) { withActualTime(time) }
-    }
-
-    private fun MaterialButton.changeButtonTitle(state: String) {
-        text = resources.getString(
+    private fun ShowTimer.setTimeIndication() {
+        binding.indicatorIcon.apply {
             when (state) {
-                State.CREATED.name -> R.string.button_start
-                State.LAUNCHED.name -> R.string.button_pause
-                State.PAUSED.name -> R.string.button_resume
-                State.RESUMED.name -> R.string.button_pause
-                else -> R.string.button_restart
+                State.LAUNCHED.name,
+                State.RESUMED.name -> startBlink()
+                else -> cancelBlink()
             }
-        )
-    }
-
-    private fun ImageView.setOnDeleteBtnClick(timer: ShowTimer?) {
-        setOnClickListener {
-            listener?.onDeleteClick(timer)
         }
     }
 
-    private fun MaterialButton.setOnControlBtnClick(timer: ShowTimer?) {
-        setOnClickListener {
+    private fun ShowTimer.setTimeProgress() {
+        launch(progressCoroutineContext) {
+            binding.progressView.withActualTime(
+                calculatedLeftTime to calculatedCommonTime
+            )
+        }
+    }
+
+    private fun ShowTimer.setOnControlButtonTitle() {
+        binding.timerControlBtn.apply {
+            text = resources.getString(
+                when (state) {
+                    State.CREATED.name -> R.string.button_start
+                    State.LAUNCHED.name -> R.string.button_pause
+                    State.STOPED.name -> R.string.button_resume
+                    State.RESUMED.name -> R.string.button_pause
+                    else -> R.string.button_restart
+                }
+            )
+        }
+    }
+
+    private fun ShowTimer.setOnDeleteBtnClick() {
+        binding.deleteTimerBtn.setOnClickListener {
+            listener?.onDeleteClick(this)
+        }
+    }
+
+    private fun ShowTimer.setOnControlBtnClick() {
+        binding.timerControlBtn.setOnClickListener {
             launch(coroutineContext) {
-                listener?.onControlClick(timer)
+                listener?.onControlClick(this@setOnControlBtnClick)
             }
+        }
+    }
+
+    private fun ShowTimer.setTimerItemBackground() {
+        binding.root.apply {
+            background = ContextCompat.getDrawable(
+                context, if (calculatedLeftTime == 0) {
+                    R.drawable.bg_item_finish_timer
+                } else {
+                    R.drawable.bg_item_bottom_edge
+                }
+            )
         }
     }
 }
@@ -104,7 +116,7 @@ class EmptyPlaceholderViewHolder(private val placeholder: TextView) :
     }
 
     private fun TextView.setText() {
-        text = context.getStringResource(R.string.placeholder_no_timers)
+        text = resources.getString(R.string.placeholder_no_timers)
     }
 
     private fun TextView.setCenterGravity() {

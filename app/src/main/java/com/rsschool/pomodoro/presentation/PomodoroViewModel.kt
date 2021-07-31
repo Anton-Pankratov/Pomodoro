@@ -1,6 +1,5 @@
 package com.rsschool.pomodoro.presentation
 
-import androidx.lifecycle.asLiveData
 import com.rsschool.domain.entity.ShowTimer
 import com.rsschool.domain.usecases.*
 import com.rsschool.pomodoro.presentation.base.BaseViewModel
@@ -19,7 +18,7 @@ class PomodoroViewModel(
     private val saveTimerUseCase: SaveTimerUseCase,
     private val updateTimerUseCase: UpdateTimerUseCase,
     private val deleteTimerUseCase: DeleteTimerUseCase,
-    private val updateBeforeCloseAppUseCase: UpdateBeforeCloseAppUseCase
+    private val setOnStopLaunchedTimersUseCase: SetOnStopLaunchedTimersUseCase
 ) : BaseViewModel() {
 
     val timersFlow
@@ -31,7 +30,7 @@ class PomodoroViewModel(
             }.toList().also {
                 it.findLaunchedTimer()
             }
-        }.asLiveData()
+        }
 
     private val _timerControlFlow = MutableStateFlow(Action.NONE)
     private val timerControlFlow: StateFlow<TimerButtonsActions> = _timerControlFlow
@@ -41,17 +40,12 @@ class PomodoroViewModel(
     private var launchedTimer: ShowTimer? = null
 
     init {
-        setOnPauseLaunchedTimers()
+        setOnStopLaunchedTimers()
         collectTimerButtonsEvents()
     }
 
     fun setButtonAction(action: Action) =
         launch { _timerControlFlow.emit(action) }
-
-    private fun setOnPauseLaunchedTimers() {
-        if (timerLauncherJob?.isActive == true) timerLauncherJob?.cancel()
-        launch { updateBeforeCloseAppUseCase.invoke() }.start()
-    }
 
     private fun collectTimerButtonsEvents() {
         launch {
@@ -61,7 +55,8 @@ class PomodoroViewModel(
                         Action.ADD -> saveTimer()
                         Action.DELETE -> deleteTimer(selectedTimer)
                         Action.CONTROL -> setControlActionFor(selectedTimer)
-                        Action.NONE -> { }
+                        Action.NONE -> {
+                        }
                     }
                 }
                 _timerControlFlow.emit(Action.NONE)
@@ -92,12 +87,18 @@ class PomodoroViewModel(
             )
         }
 
-    private fun deleteTimer(timer: ShowTimer?) =
+    private fun deleteTimer(timer: ShowTimer?) {
         launch {
             if (timer != null) {
+                updateTimerUseCase.invoke(
+                    timer.updateTimerState(
+                        state = State.CREATED.name
+                    )
+                )
                 deleteTimerUseCase.invoke(timer)
             }
         }
+    }
 
     private fun setControlActionFor(timer: ShowTimer?) {
         launch(coroutineContext) {
@@ -106,11 +107,11 @@ class PomodoroViewModel(
                 when (state) {
                     State.CREATED.name -> launchTimer(State.LAUNCHED.name)
 
-                    State.LAUNCHED.name -> cancelTimer(State.PAUSED.name)
+                    State.LAUNCHED.name -> stopTimer(State.STOPED.name)
 
-                    State.PAUSED.name -> launchTimer(State.RESUMED.name)
+                    State.STOPED.name -> launchTimer(State.RESUMED.name)
 
-                    State.RESUMED.name -> cancelTimer(State.PAUSED.name)
+                    State.RESUMED.name -> stopTimer(State.STOPED.name)
 
                     State.FINISHED.name -> launchFinishedTimer(State.LAUNCHED.name)
                 }
@@ -132,7 +133,7 @@ class PomodoroViewModel(
         startRunningTimer(updateTimerState(newState))
     }
 
-    private suspend fun ShowTimer.cancelTimer(newState: String) {
+    private suspend fun ShowTimer.stopTimer(newState: String) {
         timerLauncherJob?.apply {
             cancelAndJoin()
             if (!isActive || isCancelled || isCompleted)
@@ -143,7 +144,7 @@ class PomodoroViewModel(
     private fun startRunningTimer(timer: ShowTimer) {
         timerLauncherJob = launch(coroutineContext) {
             timer.apply {
-                pauseOtherLaunchedOrResumedTimer()
+                stopOtherLaunchedOrResumedTimer()
                 seconds?.downTo(0)?.forEach { second ->
                     formTimerModel(seconds = second).apply {
                         updateTimerUseCase.invoke(this)
@@ -151,16 +152,6 @@ class PomodoroViewModel(
                     }
                     delay(1000)
                 }
-            }
-        }
-    }
-
-    private suspend fun ShowTimer.pauseOtherLaunchedOrResumedTimer() {
-        if (id != launchedTimer?.id) {
-            launchedTimer?.let {
-                updateTimerUseCase.invoke(
-                    it.updateTimerState(State.PAUSED.name)
-                )
             }
         }
     }
@@ -199,6 +190,25 @@ class PomodoroViewModel(
         delay(1000)
         updateTimerUseCase.invoke(newTimerCycle)
         startRunningTimer(newTimerCycle)
+    }
+
+    /** On Stop launched timer when launch another timer */
+
+    private suspend fun ShowTimer.stopOtherLaunchedOrResumedTimer() {
+        if (id != launchedTimer?.id) {
+            launchedTimer?.let {
+                updateTimerUseCase.invoke(
+                    it.updateTimerState(State.STOPED.name)
+                )
+            }
+        }
+    }
+
+    /** On Stop all launched timers after start application */
+
+    private fun setOnStopLaunchedTimers() {
+        if (timerLauncherJob?.isActive == true) timerLauncherJob?.cancel()
+        launch { setOnStopLaunchedTimersUseCase.invoke() }.start()
     }
 
     private fun ShowTimer.checkEndOfMinutes() = minutes == 0

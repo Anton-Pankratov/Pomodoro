@@ -15,5 +15,5 @@ val UseCasesModule = module {
 
     single { DeleteTimerUseCase() }
 
-    single { UpdateBeforeCloseAppUseCase() }
+    single { SetOnStopLaunchedTimersUseCase() }
 }

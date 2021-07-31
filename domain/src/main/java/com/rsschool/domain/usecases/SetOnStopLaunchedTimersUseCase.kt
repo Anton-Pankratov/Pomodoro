@@ -1,5 +1,5 @@
 package com.rsschool.domain.usecases
 
-class UpdateBeforeCloseAppUseCase : BaseUseCase() {
+class SetOnStopLaunchedTimersUseCase : BaseUseCase() {
     suspend operator fun invoke() = repository.updateAllTimers()
 }

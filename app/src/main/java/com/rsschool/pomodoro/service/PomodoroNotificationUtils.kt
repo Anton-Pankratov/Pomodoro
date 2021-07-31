@@ -29,6 +29,7 @@ class PomodoroNotificationUtils(val context: Context) {
         .setContentIntent(formNotificationPendingIntent())
         .setSilent(true)
         .setSmallIcon(R.drawable.ic_timer_on_indicator)
+        .setAutoCancel(true)
 
     fun createChannel(manager: NotificationManager) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

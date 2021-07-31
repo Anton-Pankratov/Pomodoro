@@ -18,6 +18,7 @@ import com.rsschool.pomodoro.presentation.timerDialog.OnSelectTimeListener
 import com.rsschool.pomodoro.presentation.timerDialog.TimePickerDialogFragment
 import com.rsschool.pomodoro.utils.Action
 import com.rsschool.pomodoro.utils.setFormatTime
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -57,10 +58,12 @@ class PomodoroActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(context)
             adapter = timersAdapter
 
-            this@PomodoroActivity.let { context ->
+            lifecycleScope.launch {
                 viewModel.apply {
-                    timersFlow.observe(context) { timers ->
-                        if (context.lifecycle.currentState == Lifecycle.State.RESUMED)
+                    timersFlow.collect { timers ->
+                        if (this@PomodoroActivity.lifecycle.currentState
+                            == Lifecycle.State.RESUMED
+                        )
                             timersAdapter?.apply {
                                 listenOnButtonsClicks()
                                 diffUtilCallback = TimersDiffUtilsCallback(
@@ -86,10 +89,22 @@ class PomodoroActivity : AppCompatActivity() {
     }
 
     private fun showTimerPickerByClick() {
-        binding?.toolbar?.setOnMenuItemClickListener(Toolbar.OnMenuItemClickListener {
-            showTimePickerDialog()
-            return@OnMenuItemClickListener true
-        })
+        binding?.toolbar?.setOnMenuItemClickListener(
+            Toolbar.OnMenuItemClickListener {
+                showSelectTimeDialog()
+                return@OnMenuItemClickListener true
+            })
+    }
+
+    private fun showTimePickerDialog() {
+        binding?.selectTimeBtn?.setOnClickListener {
+            showSelectTimeDialog()
+        }
+    }
+
+    private fun showSelectTimeDialog() {
+        if (!timePickerDialog.isResumed)
+            timePickerDialog.show(supportFragmentManager, "picker")
     }
 
     private fun listenSelectTimeFromPicker() {
@@ -107,10 +122,10 @@ class PomodoroActivity : AppCompatActivity() {
 
     private fun TimersAdapter.listenOnButtonsClicks() {
         setOnButtonsClickListener(object : OnButtonsClickListener {
-            override fun onControlClick(clickedTimer: ShowTimer?) {
-                if (clickedTimer != null) {
+            override fun onControlClick(timer: ShowTimer?) {
+                if (timer != null) {
                     viewModel.setButtonAction(
-                        Action.CONTROL.apply { passTimer(clickedTimer) }
+                        Action.CONTROL.apply { passTimer(timer) }
                     )
                 }
             }
@@ -125,12 +140,5 @@ class PomodoroActivity : AppCompatActivity() {
                 viewModel.setButtonAction(Action.ADD)
             }
         })
-    }
-
-    private fun showTimePickerDialog() {
-        binding?.selectTimeBtn?.setOnClickListener {
-            if (!timePickerDialog.isResumed)
-                timePickerDialog.show(supportFragmentManager, "picker")
-        }
     }
 }

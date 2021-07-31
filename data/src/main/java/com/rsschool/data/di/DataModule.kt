@@ -32,5 +32,4 @@ val DataModule = module {
     single<PomodoroRepository> { PomodoroRepositoryImpl() }
 
     single { TimerMapper() }
-
 }
