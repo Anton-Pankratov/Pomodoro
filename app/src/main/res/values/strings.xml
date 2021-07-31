@@ -3,9 +3,11 @@
 
     <string name="button_start">Start</string>
     <string name="button_pause">Stop</string>
-    <string name="button_resume">Resume</string>
     <string name="button_done">Done</string>
     <string name="button_restart">Restart</string>
+
+    <!-- May be 'Resume' -->
+    <string name="button_resume">Start</string>
 
     <string name="menu_title_select_time">Select your time</string>
     <string name="placeholder_no_timers">You don\'t have a timer</string>

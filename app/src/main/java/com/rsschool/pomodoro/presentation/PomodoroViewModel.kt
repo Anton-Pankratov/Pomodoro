@@ -55,8 +55,7 @@ class PomodoroViewModel(
                         Action.ADD -> saveTimer()
                         Action.DELETE -> deleteTimer(selectedTimer)
                         Action.CONTROL -> setControlActionFor(selectedTimer)
-                        Action.NONE -> {
-                        }
+                        Action.NONE -> { }
                     }
                 }
                 _timerControlFlow.emit(Action.NONE)
@@ -189,6 +188,7 @@ class PomodoroViewModel(
         updateTimerUseCase.invoke(formTimerModel())
         delay(1000)
         updateTimerUseCase.invoke(newTimerCycle)
+        timerLauncherJob?.cancel()
         startRunningTimer(newTimerCycle)
     }
 
